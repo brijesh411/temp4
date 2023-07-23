@@ -26,12 +26,12 @@ const userSchema = new mongoose.Schema(
     },
     avatar: {
       type: String,
-      default: "https://pbs.twimg.com/media/FfZGtJpXoAEycGL.jpg",
+      default: "https://res.cloudinary.com/dm6ucvdyk/image/upload/v1683966110/wttxodtsssusmwjpkyay.png",
     },
     bg_image: {
       type: String,
       default:
-        "https://i.pinimg.com/originals/13/60/e7/1360e7721ade8b6e02f8024cec5cd895.jpg",
+        "https://res.cloudinary.com/dm6ucvdyk/image/upload/v1689599732/wd5yhnhjqus8pv3s7meu.jpg",
     },
     role: { type: String, default: "user" },
     gender: { type: String, default: "male" },

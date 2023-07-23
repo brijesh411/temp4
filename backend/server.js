@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const compression = require('compression');
 const DbConnect = require("./config/DbConnect");
 const errorMiddleware = require("./middleware/error");
 const authRouter = require("./router/authRouter");
@@ -8,38 +9,40 @@ const postRouter = require("./router/postRouter");
 const commentRouter = require("./router/commentRouter");
 require("dotenv").config();
 
+const PORT = 5000;
+
 const app = express();
 app.use(express.json({ limit: "1mb" }));
 app.use(
   cors({
     origin: [
       "http://localhost:3000",
-      "http://localhost:5000",
-      "http://192.168.0.104:5173",
-      // "https://v-media-social.netlify.app",
+      "https://socio-sphere.netlify.app"
+      
     ],
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     credentials: true,
   })
 );
-app.post('/', (req, res) => {
-  // Handle the POST request to the root URL
-  res.send('POST request received');
-});
+
+app.use(compression()); // compression middleware
 
 app.use("/api/auth", authRouter);
 app.use("/api/users", userRouter);
 app.use("/api/posts", postRouter);
 app.use("/api/comments", commentRouter);
 
+// app.post('/', (req, res) => {
+//   // Handle the POST request to the root URL
+//   res.send('POST request received');
+// });
+
+
 app.use(errorMiddleware);
 
 DbConnect()
-  .then(({ connection }) => {
-    console.log(`${connection.host}`);
-  })
   .then(() => {
-    app.listen(5000, () => {
+    app.listen(PORT, () => {
       console.log("server is running on Port 5000");
     });
   })

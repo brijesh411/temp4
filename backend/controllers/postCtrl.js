@@ -1,5 +1,11 @@
 const Post = require("../model/Post");
 const ErrorHandler = require("../utils/errorHandler");
+const imagemin = require('imagemin');
+const imageminPngquant = require('imagemin-pngquant');
+const imageminMozjpeg = require('imagemin-mozjpeg');
+const imageminGifsicle = require('imagemin-gifsicle');
+
+
 
 const createPost = async (req, res, next) => {
   const { content, images } = req.body;
@@ -7,9 +13,24 @@ const createPost = async (req, res, next) => {
     if (images.length === 0)
       return next(new ErrorHandler("Please Add images", 403));
 
+    // Compress images using imagemin
+    const compressedImages = await Promise.all(
+      images.map(async (image) => {
+        const compressedImageBuffer = await imagemin.buffer(image, {
+          plugins: [
+            imageminPngquant(), // Compress PNG images
+            imageminMozjpeg(), // Compress JPEG images
+            imageminGifsicle(), // Compress GIF images
+          ],
+        });
+        return compressedImageBuffer;
+      })
+    );
+
+    // Save the post with the compressed images
     const newPost = await Post.create({
       content,
-      images,
+      images: compressedImages,
       user: req.user._id,
     });
 
@@ -156,14 +177,7 @@ const discover = async (req, res, next) => {
     let posts = await Post.aggregate([
       { $match: { user: { $in: newArr } } },
       { $sample: { size: Number(num) } },
-      // {
-      //   $lookup: {
-      //     from: "users",
-      //     localField: "likes",
-      //     foreignField: "_id",
-      //     as: "likes",
-      //   },
-      // },
+    
       {
         $lookup: {
           from: "users",
